@@ -1,5 +1,7 @@
-# Dados brutos da Olist (arquivos grandes, baixe pelo README/Kaggle)
+# Dados (arquivos grandes - baixe o raw pelo README/Kaggle e gere o
+# processed rodando src/etl_pipeline.py)
 data/raw/
+data/processed/
 BASE DE DADOS/
 
 # Ambientes Python
