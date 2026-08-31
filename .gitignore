@@ -1,8 +1,7 @@
-# Dados (arquivos grandes - baixe o raw pelo README/Kaggle e gere o
-# processed rodando src/etl_pipeline.py)
-data/raw/
-data/processed/
-BASE DE DADOS/
+# Dados (arquivos grandes - baixe os brutos pelo README/Kaggle e gere
+# os processados rodando codigo/etl_pipeline.py)
+dados/brutos/
+dados/processados/
 
 # Ambientes Python
 __pycache__/

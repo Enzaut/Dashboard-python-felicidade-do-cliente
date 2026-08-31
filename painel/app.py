@@ -1,10 +1,10 @@
 """
 Dashboard "Felicidade do Cliente" - Olist
 ============================================
-Roda com: streamlit run dashboard/app.py
+Roda com: streamlit run painel/app.py
 
-Consome o esquema estrela gerado por src/etl_pipeline.py (rode esse
-script antes, se os arquivos em data/processed/ ainda não existirem).
+Consome o esquema estrela gerado por codigo/etl_pipeline.py (rode esse
+script antes, se os arquivos em dados/processados/ ainda não existirem).
 """
 
 import os
@@ -16,14 +16,14 @@ import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'src'))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'codigo'))
 from text_utils import tokeniza, corrige_texto  # noqa: E402
 from viz_theme import (  # noqa: E402
     CATEGORICO_ORDEM, COR_ADIANTADO, COR_ATRASADO, COR_DETRATOR, COR_NEUTRO,
     COR_PROMOTOR, GRADE, SEQUENCIAL_AZUL, SUPERFICIE, TINTA_MUTED, TINTA_PRIMARIA, TINTA_SECUNDARIA,
 )
 
-DIR_PROCESSED = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'processed')
+DIR_PROCESSED = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dados', 'processados')
 N_MIN_CORTE = 30  # tamanho minimo de amostra p/ entrar nos gráficos de categoria/estado/pagamento
 
 st.set_page_config(page_title='Felicidade do Cliente — Olist', page_icon='😊', layout='wide')
@@ -52,8 +52,8 @@ fato_pedidos = carregar_dados()
 
 if fato_pedidos is None:
     st.error(
-        'Não encontrei os dados processados em `data/processed/`. '
-        'Rode `python src/etl_pipeline.py` a partir da raiz do projeto antes de abrir o dashboard.'
+        'Não encontrei os dados processados em `dados/processados/`. '
+        'Rode `python codigo/etl_pipeline.py` a partir da raiz do projeto antes de abrir o dashboard.'
     )
     st.stop()
 
@@ -105,7 +105,7 @@ with st.sidebar.expander('ℹ️ Sobre os dados'):
 Base: [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) (Kaggle).
 
 O grão desta tabela é **1 linha por pedido avaliado** (não por item) —
-ver [`src/etl_pipeline.py`](../src/etl_pipeline.py) e o
+ver [`codigo/etl_pipeline.py`](../codigo/etl_pipeline.py) e o
 [notebook de análise](../notebooks/analise_exploratoria.ipynb) para o
 detalhe da modelagem e a análise completa.
         '''
@@ -335,5 +335,5 @@ da loja/marketplace no texto.
 st.divider()
 st.caption(
     'Dados: Brazilian E-Commerce Public Dataset by Olist (Kaggle) · '
-    'Pipeline e análise completa em `src/etl_pipeline.py` e `notebooks/analise_exploratoria.ipynb`'
+    'Pipeline e análise completa em `codigo/etl_pipeline.py` e `notebooks/analise_exploratoria.ipynb`'
 )

@@ -19,14 +19,14 @@ forma de pagamento — e o que os clientes insatisfeitos dizem com as próprias 
 📓 Análise completa, com o raciocínio por trás de cada achado: [`notebooks/analise_exploratoria.ipynb`](notebooks/analise_exploratoria.ipynb).
 
 <p align="center">
-  <img src="assets/img/02_prazo_de_entrega.png" width="800" alt="Nota média cai de 4.29 para 2.27 quando a entrega atrasa">
+  <img src="imagens/02_prazo_de_entrega.png" width="800" alt="Nota média cai de 4.29 para 2.27 quando a entrega atrasa">
 </p>
 
 ---
 
 ## 📊 Dashboard interativo
 
-`dashboard/app.py` (Streamlit) deixa explorar os mesmos dados com filtros ao vivo por
+`painel/app.py` (Streamlit) deixa explorar os mesmos dados com filtros ao vivo por
 período, estado, categoria e faixa de satisfação:
 
 - **📊 Panorama** — KPIs gerais e distribuição das notas
@@ -37,16 +37,16 @@ período, estado, categoria e faixa de satisfação:
 
 ```bash
 pip install -r requirements.txt
-python src/etl_pipeline.py        # gera data/processed/ a partir dos dados brutos
-streamlit run dashboard/app.py
+python codigo/etl_pipeline.py     # gera dados/processados/ a partir dos dados brutos
+streamlit run painel/app.py
 ```
 
 ---
 
 ## 🧱 Modelagem dos dados
 
-`src/etl_pipeline.py` lê os 9 CSVs brutos da Olist e monta um esquema estrela em
-`data/processed/`: 5 dimensões (`dim_clientes`, `dim_produtos`, `dim_vendedores`,
+`codigo/etl_pipeline.py` lê os 9 CSVs brutos da Olist e monta um esquema estrela em
+`dados/processados/`: 5 dimensões (`dim_clientes`, `dim_produtos`, `dim_vendedores`,
 `dim_geolocalizacao`, `dim_tempo`) + 2 fatos:
 
 - **`fato_pedidos`** — grão de **1 linha por pedido avaliado** (~98,7 mil linhas). É a base de tudo neste projeto.
@@ -69,27 +69,33 @@ Duas decisões de modelagem valem menção, porque mudam os números:
 ## 📁 Estrutura do projeto
 
 ```
-├── data/
-│   ├── raw/              # CSVs originais da Olist (não versionados - ver "Como rodar")
-│   └── processed/        # esquema estrela gerado pelo ETL (não versionado)
-├── src/
-│   ├── etl_pipeline.py   # ETL: raw -> esquema estrela
-│   ├── viz_theme.py      # paleta e estilo compartilhados (notebook + dashboard)
-│   └── text_utils.py     # limpeza/tokenização de texto compartilhada
+├── dados/
+│   ├── brutos/            # CSVs originais da Olist (não versionados - ver "Como rodar")
+│   └── processados/       # esquema estrela gerado pelo ETL (não versionado)
+├── codigo/
+│   ├── etl_pipeline.py    # ETL: brutos -> esquema estrela
+│   ├── viz_theme.py       # paleta e estilo compartilhados (notebook + painel)
+│   └── text_utils.py      # limpeza/tokenização de texto compartilhada
 ├── notebooks/
 │   └── analise_exploratoria.ipynb
-├── dashboard/
-│   └── app.py            # dashboard Streamlit
-├── assets/img/           # gráficos exportados (usados neste README e no post)
+├── painel/
+│   └── app.py             # dashboard Streamlit
+├── imagens/                # gráficos exportados (usados neste README e no post)
 └── requirements.txt
 ```
 
+> `notebooks/` ficou em inglês de propósito: é o nome do próprio conceito do
+> Jupyter, e é assim que qualquer pessoa de dados vai procurar essa pasta —
+> traduzir para "cadernos" só atrapalharia. `README.md` e `requirements.txt`
+> também ficam como estão: são nomes de convenção que o GitHub e o pip
+> reconhecem especificamente.
+
 ## ▶️ Como rodar do zero
 
-1. Baixe o [dataset no Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) e extraia os 9 CSVs em `data/raw/`.
+1. Baixe o [dataset no Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) e extraia os 9 CSVs em `dados/brutos/`.
 2. `pip install -r requirements.txt`
-3. `python src/etl_pipeline.py` — gera `data/processed/`.
-4. `streamlit run dashboard/app.py` — abre o dashboard, ou abra `notebooks/analise_exploratoria.ipynb` para a análise completa.
+3. `python codigo/etl_pipeline.py` — gera `dados/processados/`.
+4. `streamlit run painel/app.py` — abre o dashboard, ou abra `notebooks/analise_exploratoria.ipynb` para a análise completa.
 
 ## 🛠️ Stack
 

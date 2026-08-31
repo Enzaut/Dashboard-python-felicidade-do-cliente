@@ -36,8 +36,8 @@ import pandas as pd
 # 1. Caminhos
 # ---------------------------------------------------------------------
 DIR_SCRIPT = os.path.dirname(os.path.abspath(__file__))
-DIR_RAW = os.path.normpath(os.path.join(DIR_SCRIPT, '..', 'data', 'raw'))
-DIR_PROCESSED = os.path.normpath(os.path.join(DIR_SCRIPT, '..', 'data', 'processed'))
+DIR_RAW = os.path.normpath(os.path.join(DIR_SCRIPT, '..', 'dados', 'brutos'))
+DIR_PROCESSED = os.path.normpath(os.path.join(DIR_SCRIPT, '..', 'dados', 'processados'))
 os.makedirs(DIR_PROCESSED, exist_ok=True)
 
 
@@ -299,4 +299,4 @@ for nome, tabela in tabelas.items():
     tabela.to_csv(os.path.join(DIR_PROCESSED, nome), index=False, encoding='utf-8')
     print(f"  {nome}: {len(tabela):,} linhas, {len(tabela.columns)} colunas")
 
-print("Pipeline concluido com sucesso. Esquema estrela pronto em data/processed/.")
+print("Pipeline concluido com sucesso. Esquema estrela pronto em dados/processados/.")
