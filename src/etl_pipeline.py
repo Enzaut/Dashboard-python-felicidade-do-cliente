@@ -90,6 +90,21 @@ dim_produtos['product_category_name'] = dim_produtos['product_category_name'].fi
 dim_produtos['product_category_name_english'] = dim_produtos['product_category_name_english'].fillna(
     dim_produtos['product_category_name']
 )
+
+# Corrige typos que ja vem do arquivo de traducao original da Olist
+# (inconsistentes com a propria grafia usada em outras categorias do
+# mesmo arquivo, ex.: 'construction_tools_safety' esta certo mas
+# 'costruction_tools_tools' nao)
+CORRECOES_TYPO_CATEGORIA_EN = {
+    'costruction_tools_garden': 'construction_tools_garden',
+    'costruction_tools_tools': 'construction_tools_tools',
+    'fashio_female_clothing': 'fashion_female_clothing',
+    'home_confort': 'home_comfort',
+}
+dim_produtos['product_category_name_english'] = dim_produtos['product_category_name_english'].replace(
+    CORRECOES_TYPO_CATEGORIA_EN
+)
+
 dim_produtos = dim_produtos.drop_duplicates(subset='product_id').copy()
 
 # 3.3 dim_vendedores

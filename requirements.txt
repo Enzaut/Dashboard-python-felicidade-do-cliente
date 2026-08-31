@@ -1,0 +1,15 @@
+# Pipeline de dados
+pandas==2.3.3
+numpy==2.4.1
+
+# Graficos (notebook e dashboard)
+matplotlib==3.10.8
+seaborn==0.13.2
+plotly==7.0.0
+
+# Dashboard interativo
+streamlit==1.62.0
+
+# Execucao do notebook (opcional - so p/ regenerar notebooks/*.ipynb)
+ipykernel==7.3.0
+nbconvert==7.17.1
