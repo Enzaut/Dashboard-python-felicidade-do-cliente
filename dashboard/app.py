@@ -153,7 +153,7 @@ fig_fx.update_layout(
     barmode='stack', height=110, showlegend=True, legend=dict(orientation='h', y=-0.5),
     xaxis=dict(visible=False, range=[0, 100]), yaxis=dict(visible=False), **TEMPLATE_PLOTLY,
 )
-st.plotly_chart(fig_fx, use_container_width=True, config={'displayModeBar': False})
+st.plotly_chart(fig_fx, width='stretch', config={'displayModeBar': False})
 
 st.divider()
 
@@ -179,7 +179,7 @@ with aba_panorama:
         title='Distribuição das notas', xaxis=dict(title='Nota', tickmode='array', tickvals=[1, 2, 3, 4, 5]),
         yaxis=dict(title='Qtd. de pedidos', gridcolor=GRADE), height=420, **TEMPLATE_PLOTLY,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
 # --- Entrega ------------------------------------------------------------
 with aba_entrega:
@@ -197,7 +197,7 @@ with aba_entrega:
         customdata=resumo_prazo['count'], hovertemplate='%{x}: nota %{y:.2f} (n=%{customdata:,})<extra></extra>',
     ))
     fig1.update_layout(title='No prazo vs. atrasada', yaxis=dict(title='Nota média', range=[0, 5.3], gridcolor=GRADE), height=420, **TEMPLATE_PLOTLY)
-    col_a.plotly_chart(fig1, use_container_width=True)
+    col_a.plotly_chart(fig1, width='stretch')
 
     bins = [-9999, 0, 3, 7, 15, 9999]
     labels = ['No prazo', 'Atraso 1-3d', 'Atraso 4-7d', 'Atraso 8-15d', 'Atraso 16d+']
@@ -210,7 +210,7 @@ with aba_entrega:
         customdata=resumo_atraso['count'].fillna(0), hovertemplate='%{x}: nota %{y:.2f} (n=%{customdata:,.0f})<extra></extra>',
     ))
     fig2.update_layout(title='Efeito gradual: quanto mais atraso, pior a nota', yaxis=dict(title='Nota média', range=[0, 5.3], gridcolor=GRADE), height=420, **TEMPLATE_PLOTLY)
-    col_b.plotly_chart(fig2, use_container_width=True)
+    col_b.plotly_chart(fig2, width='stretch')
 
     taxa = entregues['entrega_no_prazo'].mean() * 100
     st.info(f'💡 {taxa:.1f}% dos pedidos (no recorte atual) chegam no prazo. Prazo de entrega é o driver mais forte de satisfação nesta base.')
@@ -240,13 +240,13 @@ with aba_produto:
 
     fig_cat = grafico_extremos(df, 'categoria_produto_principal', 'Categorias: piores e melhores')
     if fig_cat:
-        col_a.plotly_chart(fig_cat, use_container_width=True)
+        col_a.plotly_chart(fig_cat, width='stretch')
     else:
         col_a.info(f'Poucos dados no recorte atual para exibir categorias (mín. {N_MIN_CORTE} pedidos por categoria).')
 
     fig_uf = grafico_extremos(df, 'customer_state', 'Estados: piores e melhores', n_top=27)
     if fig_uf:
-        col_b.plotly_chart(fig_uf, use_container_width=True)
+        col_b.plotly_chart(fig_uf, width='stretch')
     else:
         col_b.info(f'Poucos dados no recorte atual para exibir estados (mín. {N_MIN_CORTE} pedidos por estado).')
 
@@ -266,14 +266,14 @@ with aba_pagamento:
         text=[f'{v:.2f}' for v in resumo_pg['nota']], textposition='outside',
     ))
     fig_pg.update_layout(title='Nota média por forma de pagamento', yaxis=dict(title='Nota média', range=[0, 5.3], gridcolor=GRADE), height=420, **TEMPLATE_PLOTLY)
-    col_a.plotly_chart(fig_pg, use_container_width=True)
+    col_a.plotly_chart(fig_pg, width='stretch')
 
     df_parc = df.copy()
     df_parc['faixa_parcelas'] = pd.cut(df_parc['parcelas_pagamento_principal'], bins=[-1, 1, 3, 6, 12, 99], labels=['1x', '2-3x', '4-6x', '7-12x', '13x+'])
     resumo_parc = df_parc.groupby('faixa_parcelas', observed=True)['review_score'].mean()
     fig_parc = go.Figure(go.Bar(x=resumo_parc.index.astype(str), y=resumo_parc.values, marker_color=SEQUENCIAL_AZUL[2:7], text=[f'{v:.2f}' for v in resumo_parc.values], textposition='outside'))
     fig_parc.update_layout(title='Nota média por parcelamento', yaxis=dict(title='Nota média', range=[0, 5.3], gridcolor=GRADE), height=420, **TEMPLATE_PLOTLY)
-    col_b.plotly_chart(fig_parc, use_container_width=True)
+    col_b.plotly_chart(fig_parc, width='stretch')
 
     df_tempo = df.copy()
     df_tempo['ano_mes'] = df_tempo['order_purchase_timestamp'].dt.to_period('M').astype(str)
@@ -286,7 +286,7 @@ with aba_pagamento:
         fig_tempo.update_layout(title='Nota média e volume de pedidos ao longo do tempo', showlegend=False, height=460, **TEMPLATE_PLOTLY)
         fig_tempo.update_yaxes(title_text='Nota média', gridcolor=GRADE, row=1, col=1)
         fig_tempo.update_yaxes(title_text='Pedidos', gridcolor=GRADE, row=2, col=1)
-        st.plotly_chart(fig_tempo, use_container_width=True)
+        st.plotly_chart(fig_tempo, width='stretch')
     else:
         st.info('Poucos meses no recorte atual para exibir a tendência temporal.')
 
@@ -312,7 +312,7 @@ with aba_texto:
             title=f'Palavras mais citadas por Detratores (n={len(detratores_texto):,} comentários)',
             xaxis=dict(title='% dos comentários', gridcolor=GRADE), height=460, **TEMPLATE_PLOTLY,
         )
-        col_a.plotly_chart(fig_palavras, use_container_width=True)
+        col_a.plotly_chart(fig_palavras, width='stretch')
 
         with col_b:
             st.markdown('**Alguns comentários (amostra aleatória):**')
