@@ -1,0 +1,19 @@
+# Dados brutos da Olist (arquivos grandes, baixe pelo README/Kaggle)
+data/raw/
+BASE DE DADOS/
+
+# Ambientes Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Sistema operacional / editores
+.DS_Store
+Thumbs.db
+.vscode/
