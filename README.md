@@ -1,22 +1,23 @@
-# 😊 Felicidade do Cliente — Olist
+# Felicidade do Cliente — Olist
 
-Análise de dados + dashboard interativo sobre o que realmente move a satisfação do
-cliente em um e-commerce brasileiro: prazo de entrega, categoria de produto, região,
-forma de pagamento — e o que os clientes insatisfeitos dizem com as próprias palavras.
+Análise de dados e dashboard interativo sobre o que realmente pesa na satisfação
+do cliente em um e-commerce brasileiro: prazo de entrega, categoria de produto,
+região, forma de pagamento — e o que os próprios clientes insatisfeitos dizem
+com as palavras deles.
 
-**Base de dados:** [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) (Kaggle) — ~100 mil pedidos entre set/2016 e ago/2018.
+**Base de dados:** [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) (Kaggle) — cerca de 100 mil pedidos entre set/2016 e ago/2018.
 
 ---
 
-## 🔑 Principais achados
+## Principais achados
 
-1. **Prazo de entrega é, disparado, o maior driver de satisfação.** Nota média cai de **4,29** (entrega no prazo) para **2,27** (atrasada) — e o efeito é gradual, piorando a cada faixa adicional de atraso. Só 6,7% dos pedidos atrasam, mas o impacto por pedido é enorme.
-2. **O texto dos clientes confirma o número:** as palavras mais citadas por Detratores são sobre entrega (*recebi, entrega, chegou, prazo, aguardando*), não sobre o produto.
+1. **Atraso na entrega é, disparado, o que mais derruba a satisfação.** A nota média cai de **4,29** (entrega no prazo) para **2,27** (atrasada) — e quanto maior o atraso, pior a nota. Só 6,7% dos pedidos atrasam, mas o estrago que isso causa é enorme.
+2. **Os próprios comentários confirmam o número:** as palavras mais citadas pelos clientes insatisfeitos são sobre entrega (*recebi, entrega, chegou, prazo, aguardando*), não sobre o produto em si.
 3. **Móveis de escritório** é a categoria com pior nota entre as com volume relevante (3,62); livros e alimentos ficam no topo (~4,4+).
-4. **Região importa, provavelmente pelo mesmo mecanismo:** os piores estados (RR, AL, MA) são os mais distantes dos centros de distribuição.
-5. A janela da **Black Friday (nov/2017–mar/2018)** mostra o pior trecho da série temporal — consistente com sobrecarga operacional afetando entrega.
+4. **Região também importa, provavelmente pelo mesmo motivo:** os piores estados (RR, AL, MA) são os mais distantes dos centros de distribuição.
+5. A janela da **Black Friday (nov/2017 a mar/2018)** é o pior trecho da série no tempo — bate com a ideia de que o volume extra sobrecarrega a entrega.
 
-📓 Análise completa, com o raciocínio por trás de cada achado: [`notebooks/analise_exploratoria.ipynb`](notebooks/analise_exploratoria.ipynb).
+Análise completa, com a explicação por trás de cada achado: [`notebooks/analise_exploratoria.ipynb`](notebooks/analise_exploratoria.ipynb).
 
 <p align="center">
   <img src="imagens/02_prazo_de_entrega.png" width="800" alt="Nota média cai de 4.29 para 2.27 quando a entrega atrasa">
@@ -24,89 +25,89 @@ forma de pagamento — e o que os clientes insatisfeitos dizem com as próprias 
 
 ---
 
-## 📊 Dashboard interativo
+## Dashboard interativo
 
-`painel/app.py` (Streamlit) deixa explorar os mesmos dados com filtros ao vivo por
-período, estado, categoria e faixa de satisfação:
+`painel/app.py` (feito em Streamlit) deixa explorar os mesmos dados com filtros
+ao vivo por período, estado, categoria e nível de satisfação:
 
-- **📊 Panorama** — KPIs gerais e distribuição das notas
-- **🚚 Entrega** — o driver mais forte, com o efeito gradual do atraso
-- **📦 Produto & Região** — piores/melhores categorias e estados
-- **💳 Pagamento & Tendência** — forma de pagamento, parcelamento e evolução mensal
-- **💬 Vozes do cliente** — palavras mais citadas pelos Detratores (reativo aos filtros) + amostra de comentários reais
+- **Panorama** — visão geral e distribuição das notas
+- **Entrega** — o motivo que mais pesa, com o efeito do atraso bem visível
+- **Produto e região** — piores e melhores categorias e estados
+- **Pagamento e tendência** — forma de pagamento, parcelamento e evolução mês a mês
+- **Vozes do cliente** — palavras mais citadas por quem deu nota baixa (muda junto com os filtros) e alguns comentários reais
 
 ```bash
 pip install -r requirements.txt
-python codigo/etl_pipeline.py     # gera dados/processados/ a partir dos dados brutos
+python codigo/etl_pipeline.py     # organiza os dados brutos em dados/processados/
 streamlit run painel/app.py
 ```
 
 ---
 
-## 🧱 Modelagem dos dados
+## Como os dados foram organizados
 
-`codigo/etl_pipeline.py` lê os 9 CSVs brutos da Olist e monta um esquema estrela em
-`dados/processados/`: 5 dimensões (`dim_clientes`, `dim_produtos`, `dim_vendedores`,
-`dim_geolocalizacao`, `dim_tempo`) + 2 fatos:
+`codigo/etl_pipeline.py` lê os 9 arquivos originais da Olist e monta um formato
+bem comum em BI: uma tabela principal e um punhado de tabelas de apoio, todas
+em `dados/processados/`.
 
-- **`fato_pedidos`** — grão de **1 linha por pedido avaliado** (~98,7 mil linhas). É a base de tudo neste projeto.
-- **`fato_itens_pedido`** — grão de 1 linha por item do pedido, para análises de categoria/vendedor que precisam desse nível de detalhe.
+- **`fato_pedidos`** é a tabela principal: uma linha para cada pedido avaliado (cerca de 98,7 mil linhas). É a base de praticamente tudo neste projeto.
+- As tabelas de apoio guardam informação de clientes, produtos, vendedores e datas.
+- **`fato_itens_pedido`** existe à parte, com uma linha por item do pedido, pra quando a análise precisa descer nesse nível de detalhe.
 
-Duas decisões de modelagem valem menção, porque mudam os números:
+Duas decisões valem menção, porque mudam os números:
 
-- **Correção de fan-out:** uma primeira versão deste pipeline cruzava reviews com
-  itens do pedido usando só `order_id`. Pedidos com mais de um item duplicavam a
-  linha da review — o arquivo final tinha 48.166 linhas para 40.668 avaliações
-  únicas. A versão atual agrega itens e pagamentos ao grão "1 por pedido" antes do
-  join final, e tem um `assert` no próprio script garantindo que isso não volte a
-  acontecer.
-- **Amostra maior:** a primeira versão usava só avaliações com comentário de texto
-  (~41 mil). `fato_pedidos` usa todas as avaliações com nota, texto ou não
-  (~98,7 mil) — o texto continua disponível para quem quiser fazer mineração dele.
+- **Um bug que encontrei e corrigi:** a primeira versão deste script cruzava as
+  avaliações com os itens de cada pedido usando só o número do pedido. Pedidos
+  com mais de um item faziam a mesma avaliação contar várias vezes — o arquivo
+  final tinha 48.166 linhas para apenas 40.668 avaliações de verdade. Corrigi
+  agrupando os itens por pedido antes de juntar com as avaliações, e deixei uma
+  verificação automática no próprio script pra garantir que isso não se repita.
+- **Amostra maior:** a primeira versão só usava avaliações que também tinham um
+  comentário escrito (~41 mil). A versão atual usa todas as avaliações com nota,
+  com ou sem comentário (~98,7 mil) — o texto continua disponível pra quem
+  quiser analisar os comentários à parte.
 
 ---
 
-## 📁 Estrutura do projeto
+## Estrutura do projeto
 
 ```
 ├── dados/
-│   ├── brutos/            # CSVs originais da Olist (não versionados - ver "Como rodar")
-│   └── processados/       # esquema estrela gerado pelo ETL (não versionado)
+│   ├── brutos/            # arquivos originais da Olist (não vem no repositório - ver "Como rodar")
+│   └── processados/       # dados organizados, gerados pelo script (também não vem no repositório)
 ├── codigo/
-│   ├── etl_pipeline.py    # ETL: brutos -> esquema estrela
-│   ├── viz_theme.py       # paleta e estilo compartilhados (notebook + painel)
-│   └── text_utils.py      # limpeza/tokenização de texto compartilhada
+│   ├── etl_pipeline.py    # organiza os dados brutos
+│   ├── viz_theme.py       # cores e estilo usados no notebook e no painel
+│   └── text_utils.py      # limpeza de texto usada nos comentários dos clientes
 ├── notebooks/
 │   └── analise_exploratoria.ipynb
 ├── painel/
-│   └── app.py             # dashboard Streamlit
-├── imagens/                # gráficos exportados (usados neste README e no post)
+│   └── app.py             # o dashboard
+├── imagens/                # gráficos exportados (usados aqui no README e no post)
 └── requirements.txt
 ```
 
-> `notebooks/` ficou em inglês de propósito: é o nome do próprio conceito do
-> Jupyter, e é assim que qualquer pessoa de dados vai procurar essa pasta —
-> traduzir para "cadernos" só atrapalharia. `README.md` e `requirements.txt`
-> também ficam como estão: são nomes de convenção que o GitHub e o pip
-> reconhecem especificamente.
+`notebooks/` ficou em inglês por ser o nome do próprio recurso do Jupyter — é
+assim que qualquer pessoa de dados vai procurar essa pasta. `README.md` e
+`requirements.txt` também ficam como estão: são nomes que o GitHub e o pip
+reconhecem especificamente por esse nome.
 
-## ▶️ Como rodar do zero
+## Como rodar do zero
 
-1. Baixe o [dataset no Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) e extraia os 9 CSVs em `dados/brutos/`.
+1. Baixe o [dataset no Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) e coloque os 9 arquivos em `dados/brutos/`.
 2. `pip install -r requirements.txt`
 3. `python codigo/etl_pipeline.py` — gera `dados/processados/`.
-4. `streamlit run painel/app.py` — abre o dashboard, ou abra `notebooks/analise_exploratoria.ipynb` para a análise completa.
+4. `streamlit run painel/app.py` — abre o dashboard, ou abra `notebooks/analise_exploratoria.ipynb` pra ver a análise completa.
 
-## 🛠️ Stack
+## Tecnologias usadas
 
-Python · pandas · numpy · matplotlib/seaborn (notebook) · Plotly (dashboard) · Streamlit
+Python, pandas, numpy, matplotlib e seaborn (no notebook), Plotly e Streamlit (no dashboard).
 
-## 📌 Próximos passos
+## Próximos passos
 
-Versão do dashboard em **Power BI** sobre o mesmo esquema estrela, como segunda
-peça do portfólio.
+Uma versão do mesmo dashboard em Power BI, como segunda peça do portfólio.
 
-## 📄 Dados
+## Sobre os dados
 
 [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce),
-disponibilizado publicamente no Kaggle sob licença CC BY-NC-SA 4.0.
+disponibilizado publicamente no Kaggle sob a licença CC BY-NC-SA 4.0.

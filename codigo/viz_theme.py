@@ -1,17 +1,12 @@
 """
-Paleta e estilo visual compartilhados entre o notebook de analise
-(matplotlib/seaborn) e o dashboard (plotly/Streamlit), para manter a
-mesma identidade visual em todo o projeto.
+Cores e estilo compartilhados entre o notebook (matplotlib) e o painel
+(plotly), pra manter a mesma identidade visual no projeto todo.
 
-Paleta validada para daltonismo (CVD) e contraste - ver metodologia em
-https://github.com/anthropics (skill interna "dataviz"); os passos
-sequenciais/hex nao devem ser reordenados, pois a ordem faz parte da
-validacao de acessibilidade.
+Paleta validada pra daltonismo e contraste - a ordem das cores abaixo
+faz parte dessa validacao, entao evite reordenar.
 """
 
-# ---------------------------------------------------------------------
-# Categorica (ordem fixa - nunca reordenar nem "ciclar" as cores)
-# ---------------------------------------------------------------------
+# categorica (ordem fixa - nunca reordenar nem "ciclar" as cores)
 CATEGORICO_ORDEM = [
     '#2a78d6',  # azul
     '#eb6834',  # laranja
@@ -23,9 +18,7 @@ CATEGORICO_ORDEM = [
     '#e34948',  # vermelho
 ]
 
-# ---------------------------------------------------------------------
-# Status (satisfacao) - semaforo Promotor / Neutro / Detrator
-# ---------------------------------------------------------------------
+# satisfacao (Promotor / Neutro / Detrator)
 COR_PROMOTOR = '#0ca30c'
 COR_NEUTRO = '#fab219'
 COR_DETRATOR = '#d03b3b'
@@ -36,21 +29,14 @@ CORES_SATISFACAO = {
 }
 ORDEM_SATISFACAO = ['Detrator', 'Neutro', 'Promotor']
 
-# ---------------------------------------------------------------------
-# Diverging (atraso x adiantamento na entrega)
-# ---------------------------------------------------------------------
+# atraso x adiantamento na entrega
 COR_ADIANTADO = '#2a78d6'
 COR_ATRASADO = '#e34948'
 COR_NEUTRO_DIVERGENTE = '#c3c2b7'
 
-# ---------------------------------------------------------------------
-# Sequencial (azul, claro -> escuro) p/ magnitude (ex.: valor, volume)
-# ---------------------------------------------------------------------
+# azul claro -> escuro, pra magnitude (valor, volume)
 SEQUENCIAL_AZUL = ['#cde2fb', '#9ec5f4', '#6da7ec', '#3987e5', '#256abf', '#184f95', '#0d366b']
 
-# ---------------------------------------------------------------------
-# Chrome / tipografia
-# ---------------------------------------------------------------------
 SUPERFICIE = '#fcfcfb'
 TINTA_PRIMARIA = '#0b0b0b'
 TINTA_SECUNDARIA = '#52514e'
@@ -60,8 +46,7 @@ FONTE = 'Segoe UI, system-ui, sans-serif'
 
 
 def aplicar_estilo_matplotlib():
-    """Aplica o tema visual do projeto ao matplotlib/seaborn (para o notebook
-    e para qualquer figura estatica exportada para assets/img/)."""
+    """Aplica o tema do projeto ao matplotlib (notebook e imagens exportadas)."""
     import matplotlib.pyplot as plt
 
     plt.rcParams.update({
