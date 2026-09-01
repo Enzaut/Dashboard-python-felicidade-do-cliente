@@ -1,10 +1,10 @@
 """
 Dashboard "Felicidade do Cliente" - Olist
-============================================
+
 Roda com: streamlit run painel/app.py
 
-Consome o esquema estrela gerado por codigo/etl_pipeline.py (rode esse
-script antes, se os arquivos em dados/processados/ ainda não existirem).
+Consome os dados gerados por codigo/etl_pipeline.py (rode esse script
+antes, se os arquivos em dados/processados/ ainda não existirem).
 """
 
 import os
@@ -24,14 +24,11 @@ from viz_theme import (  # noqa: E402
 )
 
 DIR_PROCESSED = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dados', 'processados')
-N_MIN_CORTE = 30  # tamanho minimo de amostra p/ entrar nos gráficos de categoria/estado/pagamento
+N_MIN_CORTE = 30  # amostra mínima pra entrar nos gráficos de categoria/estado/pagamento
 
-st.set_page_config(page_title='Felicidade do Cliente — Olist', page_icon='😊', layout='wide')
+st.set_page_config(page_title='Felicidade do Cliente — Olist', layout='wide')
 
 
-# ---------------------------------------------------------------------
-# Dados
-# ---------------------------------------------------------------------
 @st.cache_data
 def carregar_dados():
     caminho = os.path.join(DIR_PROCESSED, 'fato_pedidos.csv')
@@ -43,8 +40,6 @@ def carregar_dados():
     )
     dim_clientes = pd.read_csv(os.path.join(DIR_PROCESSED, 'dim_clientes.csv'))
     fp = fp.merge(dim_clientes[['customer_id', 'customer_state']], on='customer_id', how='left')
-    # o CSV guarda True/False/vazio; volta como object com bool/NaN reais,
-    # e .astype('boolean') (usado mais adiante) já lida bem com isso
     return fp
 
 
@@ -64,10 +59,8 @@ TEMPLATE_PLOTLY = dict(
 )
 
 
-# ---------------------------------------------------------------------
-# Sidebar - filtros (aplicados a todas as abas)
-# ---------------------------------------------------------------------
-st.sidebar.header('🔎 Filtros')
+# filtros na barra lateral, aplicados a todas as abas
+st.sidebar.header('Filtros')
 
 data_min = fato_pedidos['order_purchase_timestamp'].min().date()
 data_max = fato_pedidos['order_purchase_timestamp'].max().date()
@@ -99,15 +92,14 @@ if faixas_sel:
 
 st.sidebar.caption(f'{len(df):,} de {len(fato_pedidos):,} pedidos selecionados')
 
-with st.sidebar.expander('ℹ️ Sobre os dados'):
+with st.sidebar.expander('Sobre os dados'):
     st.markdown(
         '''
 Base: [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) (Kaggle).
 
-O grão desta tabela é **1 linha por pedido avaliado** (não por item) —
-ver [`codigo/etl_pipeline.py`](../codigo/etl_pipeline.py) e o
-[notebook de análise](../notebooks/analise_exploratoria.ipynb) para o
-detalhe da modelagem e a análise completa.
+Cada linha desta tabela é um pedido avaliado (não um item) — ver
+[`codigo/etl_pipeline.py`](../codigo/etl_pipeline.py) e o
+[notebook de análise](../notebooks/analise_exploratoria.ipynb) pra mais detalhe.
         '''
     )
 
@@ -116,10 +108,7 @@ if df.empty:
     st.stop()
 
 
-# ---------------------------------------------------------------------
-# Cabeçalho + KPIs
-# ---------------------------------------------------------------------
-st.title('😊 Felicidade do Cliente — Olist')
+st.title('Felicidade do Cliente — Olist')
 st.caption('O que faz um cliente virar promotor ou detrator neste e-commerce brasileiro.')
 
 nota_media = df['review_score'].mean()
@@ -135,8 +124,8 @@ c3.metric('% Promotores', f'{pct_promotor:.1f}%')
 c4.metric('Entregas no prazo', f'{taxa_no_prazo:.1f}%')
 c5.metric('Ticket médio', f'R$ {ticket_medio:,.2f}')
 
-# barra única empilhada: composição Detrator / Neutro / Promotor
-# (barmode='stack' cuida do empilhamento sozinho - não combinar com base=)
+# barra única empilhada com a composição Detrator / Neutro / Promotor -
+# barmode='stack' já empilha sozinho, não precisa somar um base= manual
 contagem_fx = df['faixa_satisfacao'].value_counts()
 total_fx = contagem_fx.sum()
 fig_fx = go.Figure()
@@ -157,15 +146,10 @@ st.plotly_chart(fig_fx, width='stretch', config={'displayModeBar': False})
 
 st.divider()
 
-
-# ---------------------------------------------------------------------
-# Abas
-# ---------------------------------------------------------------------
 aba_panorama, aba_entrega, aba_produto, aba_pagamento, aba_texto = st.tabs([
-    '📊 Panorama', '🚚 Entrega', '📦 Produto & Região', '💳 Pagamento & Tendência', '💬 Vozes do cliente',
+    'Panorama', 'Entrega', 'Produto e região', 'Pagamento e tendência', 'Vozes do cliente',
 ])
 
-# --- Panorama ---------------------------------------------------------
 with aba_panorama:
     cor_por_nota = {1: COR_DETRATOR, 2: COR_DETRATOR, 3: COR_NEUTRO, 4: COR_PROMOTOR, 5: COR_PROMOTOR}
     contagem_notas = df['review_score'].value_counts().sort_index()
@@ -181,13 +165,14 @@ with aba_panorama:
     )
     st.plotly_chart(fig, width='stretch')
 
-# --- Entrega ------------------------------------------------------------
 with aba_entrega:
     entregues = df.dropna(subset=['entrega_no_prazo']).copy()
     entregues['entrega_no_prazo'] = entregues['entrega_no_prazo'].astype('boolean')
 
     col_a, col_b = st.columns([1, 2])
 
+    # reindex([True, False]) porque o groupby ordena por booleano (False antes
+    # de True), o que bate errado com a ordem dos rótulos abaixo se não fixar
     resumo_prazo = entregues.groupby('entrega_no_prazo', observed=True)['review_score'].agg(['mean', 'count'])
     resumo_prazo = resumo_prazo.reindex([True, False])
     resumo_prazo.index = ['No prazo', 'Atrasada']
@@ -213,9 +198,8 @@ with aba_entrega:
     col_b.plotly_chart(fig2, width='stretch')
 
     taxa = entregues['entrega_no_prazo'].mean() * 100
-    st.info(f'💡 {taxa:.1f}% dos pedidos (no recorte atual) chegam no prazo. Prazo de entrega é o driver mais forte de satisfação nesta base.')
+    st.info(f'{taxa:.1f}% dos pedidos (no recorte atual) chegam no prazo. Prazo de entrega é o que mais pesa na satisfação nesta base.')
 
-# --- Produto & Região -----------------------------------------------------
 with aba_produto:
     col_a, col_b = st.columns(2)
 
@@ -250,7 +234,6 @@ with aba_produto:
     else:
         col_b.info(f'Poucos dados no recorte atual para exibir estados (mín. {N_MIN_CORTE} pedidos por estado).')
 
-# --- Pagamento & Tendência ------------------------------------------------
 with aba_pagamento:
     col_a, col_b = st.columns(2)
 
@@ -290,7 +273,6 @@ with aba_pagamento:
     else:
         st.info('Poucos meses no recorte atual para exibir a tendência temporal.')
 
-# --- Vozes do cliente ------------------------------------------------------
 with aba_texto:
     detratores_texto = df[(df['faixa_satisfacao'] == 'Detrator') & df['review_comment_message'].notna()]
 
@@ -320,15 +302,15 @@ with aba_texto:
             for texto in amostra:
                 st.markdown(f'> {corrige_texto(texto)[:220]}{"…" if len(texto) > 220 else ""}')
 
-    with st.expander('📎 Nota metodológica sobre a mineração de texto'):
+    with st.expander('Nota sobre a mineração de texto'):
         st.markdown(
             '''
-Contagem simples de palavras (não é um modelo de NLP/sentimento) sobre os
+Contagem simples de palavras (não é um modelo de NLP/sentimento) nos
 comentários de pedidos com nota Detratora (1-2). Cada comentário conta no
 máximo 1 vez por palavra. Duas limpezas aplicadas: correção de um problema
-de codificação de caracteres presente no dataset original da Olist, e
-remoção de um apelido fictício ("lannister") usado para anonimizar o nome
-da loja/marketplace no texto.
+de codificação de caracteres que já vem do dataset original da Olist, e
+remoção de um apelido fictício ("lannister") que o dataset usa pra
+anonimizar o nome da loja/marketplace no texto.
             '''
         )
 
